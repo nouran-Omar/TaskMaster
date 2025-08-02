@@ -1,0 +1,186 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Task Manager{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/tasks.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="app-container">
+        <header class="app-header">
+            <h1><i class="fas fa-tasks"></i> TaskMaster Pro</h1>
+            <p>Organize your work and boost productivity</p>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="user-profile">
+                    <div class="avatar">{{ app.user.firstName|first }}{{ app.user.lastName|first }}</div>
+                    <div class="user-info">
+                        <span class="username">{{ app.user.firstName }} {{ app.user.lastName }}</span>
+                        <span class="user-email">{{ app.user.email }}</span>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul>
+                        <li class="{{ app.request.get('_route') == 'tasks_inbox' ? 'active' }}"><a href="{{ path('tasks_inbox') }}"><i class="fas fa-inbox"></i> Inbox</a></li>
+                        <li class="{{ app.request.get('_route') == 'tasks_important' ? 'active' }}"><a href="{{ path('tasks_important') }}"><i class="fas fa-star"></i> Important</a></li>
+                        <li class="{{ app.request.get('_route') == 'tasks_planned' ? 'active' }}"><a href="{{ path('tasks_planned') }}"><i class="fas fa-calendar"></i> Planned</a></li>
+                        <li class="{{ app.request.get('_route') == 'tasks_completed' ? 'active' }}"><a href="{{ path('tasks_completed') }}"><i class="fas fa-check"></i> Completed</a></li>
+                        <li class="{{ app.request.get('_route') == 'tasks_categories' ? 'active' }}"><a href="{{ path('tasks_categories') }}"><i class="fas fa-tag"></i> Categories</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span>Today's Progress</span>
+                        <span>{{ progress }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ progress }}%;"></div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="task-manager">
+                <div class="task-header">
+                    <h2>{{ page_title }}</h2>
+                    <div class="task-actions">
+                        <button class="btn btn-primary" id="add-task-btn">
+                            <i class="fas fa-plus"></i> Add Task
+                        </button>
+                        <div class="view-options">
+                            <button class="view-option active"><i class="fas fa-list"></i></button>
+                            <button class="view-option"><i class="fas fa-th-large"></i></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="task-filters">
+                    <div class="filter-group">
+                        <label for="filter-status">Status:</label>
+                        <select id="filter-status">
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-priority">Priority:</label>
+                        <select id="filter-priority">
+                            <option value="all">All</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-date">Due Date:</label>
+                        <select id="filter-date">
+                            <option value="all">All</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="task-list" id="task-list">
+                    {% for task in tasks %}
+                        <div class="task-item {{ task.completed ? 'completed' : '' }}">
+                            <div class="task-checkbox">
+                                <input type="checkbox" {{ task.completed ? 'checked' : '' }} data-id="{{ task.id }}">
+                            </div>
+                            <div class="task-content">
+                                <h3 class="task-title">{{ task.title }}</h3>
+                                <p class="task-description">{{ task.description }}</p>
+                                <div class="task-meta">
+                                    <span class="task-due-date">
+                                        <i class="far fa-calendar-alt"></i> 
+                                        {% if task.dueDate %}
+                                            {{ task.dueDate|date('M d, Y') }}
+                                        {% else %}
+                                            No due date
+                                        {% endif %}
+                                    </span>
+                                    <span class="task-priority priority-{{ task.priority }}">{{ task.priority }}</span>
+                                </div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="task-action-btn edit-task" data-id="{{ task.id }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="task-action-btn delete-task" data-id="{{ task.id }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="no-tasks">No tasks found. Add a new task to get started!</p>
+                    {% endfor %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Add New Task</h3>
+            <form id="task-form" action="{{ path('task_create') }}" method="POST">
+                <div class="form-group">
+                    <label for="task-title">Task Title</label>
+                    <input type="text" id="task-title" name="title" placeholder="Enter task title" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-description">Description</label>
+                    <textarea id="task-description" name="description" placeholder="Enter task description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-due-date">Due Date</label>
+                        <input type="date" id="task-due-date" name="dueDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority" name="priority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="task-category">Category</label>
+                    <select id="task-category" name="category">
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                        <option value="shopping">Shopping</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-task">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Modal (hidden by default) -->
+    <div class="modal" id="edit-modal">
+        <!-- Content will be loaded dynamically -->
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/tasks.js') }}"></script>
+{% endblock %}
