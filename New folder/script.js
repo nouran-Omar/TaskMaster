@@ -429,124 +429,72 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("filter-priority").addEventListener("change", filterTasks);
   document.getElementById("filter-date").addEventListener("change", filterTasks);
 
-  // ── 🛠️ تصدير PDF — يبني نسخة مستقلة من كل التاسكات بدون أي قص أو سكرول، ثم يحوّلها لـ PDF متعدد الصفحات ──
+  // ── 🛠️ كود تصدير الـ PDF المصلح والمحسّن بالكامل ──
   downloadPdfBtn.addEventListener("click", async () => {
     const orig = downloadPdfBtn.innerHTML;
     downloadPdfBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generating…`;
     downloadPdfBtn.disabled = true;
 
+    // الحصول على الوضع الحالي (مظلم أو مضيء) لتهيئة اللقطة بشكل صحيح
     const isDarkMode = document.body.classList.contains("dark-mode");
-    // دايمًا بنصدّر كل الـ tasks الموجودة فعليًا، بدون أي اعتماد على ما هو ظاهر
-    // حاليًا على الشاشة (فلتر/سكرول) — كده مفيش أي تاسك يضيع من التصدير
-    const toExport = [...tasks];
-
-    // نبني عنصر مؤقت خارج الشاشة فيه كل التاسكات بالكامل بدون أي تقييد ارتفاع
-    const printRoot = document.createElement("div");
-    printRoot.style.position = "fixed";
-    printRoot.style.top = "0";
-    printRoot.style.left = "-9999px";
-    printRoot.style.width = "780px";
-    printRoot.style.padding = "32px";
-    printRoot.style.background = isDarkMode ? "#180228" : "#ffffff";
-    printRoot.style.color = isDarkMode ? "#F5D6F0" : "#18062A";
-    printRoot.style.fontFamily = "'Plus Jakarta Sans','Inter',sans-serif";
-
-    const priorityColors = {
-      high:   { bg: isDarkMode ? "#3A0820" : "#FDEDF3", fg: isDarkMode ? "#FF6B8A" : "#E53E6A" },
-      medium: { bg: isDarkMode ? "#3A2400" : "#FFF4DC", fg: isDarkMode ? "#FFB347" : "#D4860A" },
-      low:    { bg: isDarkMode ? "#0A2E20" : "#E5F8F1", fg: isDarkMode ? "#5DD6AA" : "#22916E" }
-    };
-    const borderColor = isDarkMode ? "#3D1060" : "#E5D5F0";
-    const mutedColor = isDarkMode ? "#C497C8" : "#6B4A80";
-
-    const headerHtml = `
-      <div style="margin-bottom:22px;border-bottom:3px solid ${isDarkMode ? "#8B3A8B" : "#4A0060"};padding-bottom:14px;display:flex;justify-content:space-between;align-items:baseline;">
-        <h1 style="font-size:22px;font-weight:800;margin:0;color:${isDarkMode ? "#F5D6F0" : "#4A0060"};">TaskMaster Pro — Task Report</h1>
-        <span style="font-size:12px;color:${mutedColor};">${new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</span>
-      </div>
-      <div style="margin-bottom:20px;font-size:13px;color:${mutedColor};font-weight:600;">
-        Total: ${toExport.length} &nbsp;|&nbsp; Completed: ${toExport.filter(t => t.completed).length} &nbsp;|&nbsp; Pending: ${toExport.filter(t => !t.completed).length}
-      </div>
-    `;
-
-    const tasksHtml = toExport.length === 0
-      ? `<p style="text-align:center;color:${mutedColor};padding:40px 0;">No tasks to display.</p>`
-      : toExport.map(task => {
-          const pc = priorityColors[task.priority] || priorityColors.low;
-          const due = task.dueDate
-            ? new Date(task.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
-            : "No due date";
-          return `
-            <div style="display:flex;gap:14px;padding:14px 16px;margin-bottom:10px;border:1px solid ${borderColor};border-left:4px solid ${pc.fg};border-radius:10px;${task.completed ? "opacity:0.65;" : ""}page-break-inside:avoid;">
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:14px;font-weight:700;margin-bottom:4px;${task.completed ? "text-decoration:line-through;" : ""}">
-                  ${task.completed ? "✓ " : ""}${escapeHtml(task.title || "Untitled task")}
-                </div>
-                ${task.description ? `<div style="font-size:12px;color:${mutedColor};margin-bottom:8px;line-height:1.5;">${escapeHtml(task.description)}</div>` : ""}
-                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:11px;">
-                  <span style="color:${mutedColor};font-weight:600;">📅 ${due}</span>
-                  <span style="background:${pc.bg};color:${pc.fg};padding:2px 10px;border-radius:999px;font-weight:800;text-transform:uppercase;font-size:10px;">${task.priority || ""}</span>
-                  <span style="background:${isDarkMode ? "#230838" : "#F0E8F8"};color:${mutedColor};padding:2px 10px;border-radius:999px;font-weight:600;font-size:10px;">${task.category || ""}</span>
-                  ${task.completed ? `<span style="color:${isDarkMode ? "#5DD6AA" : "#22916E"};font-weight:700;">COMPLETED</span>` : ""}
-                </div>
-              </div>
-            </div>
-          `;
-        }).join("");
-
-    function escapeHtml(str) {
-      const div = document.createElement("div");
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    printRoot.innerHTML = headerHtml + `<div>${tasksHtml}</div>`;
-    document.body.appendChild(printRoot);
+    const container = document.querySelector(".task-manager");
 
     try {
-      // نخلي المتصفح يعمل layout كامل للعنصر قبل التصوير
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-      const canvas = await html2canvas(printRoot, {
-        scale: 2,
+      const canvas = await html2canvas(container, {
+        scale: 2, // دقة مضاعفة فائقة النقاء لإنتاج نصوص واضحة
         useCORS: true,
         logging: false,
-        backgroundColor: isDarkMode ? "#180228" : "#ffffff",
-        windowWidth: printRoot.scrollWidth,
-        windowHeight: printRoot.scrollHeight,
-        height: printRoot.scrollHeight,
-        width: printRoot.scrollWidth
+        backgroundColor: isDarkMode ? "#180228" : "#ffffff", // تحديد لون الخلفية بناءً على الثيم النشط
+        onclone: (clonedDoc) => {
+          const clonedTarget = clonedDoc.querySelector(".task-manager");
+          if (clonedTarget) {
+            // إجبار الكلون على أخذ لون الخط والخلفية الصريح للتخلص من مشكلة الألوان البيضاء المفقودة
+            clonedTarget.style.color = isDarkMode ? "#F5D6F0" : "#18062A";
+            clonedTarget.style.background = isDarkMode ? "#180228" : "#ffffff";
+            clonedTarget.style.boxShadow = "none";
+            clonedTarget.style.borderRadius = "0";
+            
+            // إخفاء الأزرار وصناديق الاختيار أثناء الطباعة لمنح الملف مظهر احترافي نقي
+            clonedTarget.querySelectorAll(".task-actions, .task-checkbox, .task-header .task-actions").forEach(e => {
+              e.style.display = "none";
+            });
+
+            // التأكيد على ظهور التواريخ والبيانات الوصفية للخطوط بوضوح متناهي
+            clonedTarget.querySelectorAll(".task-due-date, .task-meta, .task-due-date span").forEach(e => {
+              e.style.opacity = "1";
+              e.style.visibility = "visible";
+              e.style.color = isDarkMode ? "#C497C8" : "#6B4A80";
+            });
+          }
+        }
       });
 
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pdfWidth;
+      
+      const imgWidth = pdfWidth - 20; 
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      const imgData = canvas.toDataURL("image/png");
-
-      // تقسيم الصورة الطويلة على عدة صفحات A4 بدون قص أي تاسك في النص
-      let remainingHeight = imgHeight;
-      let position = 0;
-      let firstPage = true;
-
-      while (remainingHeight > 0) {
-        if (!firstPage) pdf.addPage();
-        firstPage = false;
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        remainingHeight -= pdfHeight;
-        position -= pdfHeight;
-      }
-
+      
+      // رأس الصفحة للملف الصادر
+      pdf.setFontSize(16);
+      pdf.setTextColor(isDarkMode ? 139 : 74, isDarkMode ? 58 : 0, isDarkMode ? 139 : 96);
+      pdf.text("TaskMaster Pro — Task Report", pdfWidth / 2, 15, { align: "center" });
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(120, 120, 120);
+      pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, pdfWidth / 2, 22, { align: "center" });
+      
+      // إلحاق الصورة بالصفحة
+      pdf.addImage(canvas, "PNG", 10, 30, imgWidth, imgHeight);
       pdf.save("TaskMaster-Tasks.pdf");
-      Swal.fire({ icon: "success", title: "PDF Ready!", text: `Exported ${toExport.length} task(s) successfully.`, showConfirmButton: false, timer: 2000 });
+
+      Swal.fire({ icon: "success", title: "PDF Ready!", text: "Your task report has been downloaded.", showConfirmButton: false, timer: 2000 });
     } catch (err) {
       console.error(err);
       Swal.fire({ icon: "error", title: "Oops!", text: "Couldn't generate the PDF correctly. Please try again." });
     } finally {
-      document.body.removeChild(printRoot);
       downloadPdfBtn.innerHTML = orig;
       downloadPdfBtn.disabled = false;
     }
