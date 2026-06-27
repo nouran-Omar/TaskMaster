@@ -1,31 +1,30 @@
-# TaskMaster - Kanban-style Project Management UI
+# TaskMaster - Kanban Board (Vanilla JS)
 
-A sleek, responsive Kanban-style task management board built with React, TypeScript, and Tailwind CSS. This project is designed to showcase advanced front-end skills, including complex state management, drag-and-drop interactions, and building high-fidelity user interfaces.
+A sleek, responsive Kanban-style task management board built purely with **Vanilla JavaScript** and styled with **Tailwind CSS**. This project demonstrates the power of core web technologies to create complex, interactive user interfaces without relying on a front-end framework.
 
-[![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5)
 
 ---
 
 ## 🎯 Project Overview
 
-TaskMaster provides a clean and intuitive interface for managing tasks across different stages of a workflow (e.g., "To Do", "In Progress", "Done"). It serves as a practical demonstration of modern front-end development techniques.
+TaskMaster provides a clean and intuitive interface for managing tasks across different workflow stages. It's a practical example of building a modern, single-page application (SPA) feel using fundamental web development skills.
 
 ## ✨ Key Features
 
-- **Drag & Drop:** Seamlessly move tasks between columns to update their status.
-- **Responsive Design:** A fully responsive layout that looks great on desktops, tablets, and mobile devices.
-- **Component-Based Architecture:** Built with reusable and maintainable React components.
-- **Type Safety:** Leverages TypeScript to ensure code reliability and prevent common errors.
-- **Complex State Management:** Implements logic to handle the state of tasks and columns efficiently.
-- **Modern Styling:** Styled with Tailwind CSS for a utility-first, clean aesthetic.
+- **Framework-Free:** Built entirely with plain JavaScript to showcase strong proficiency in the core language and DOM manipulation.
+- **Native Drag & Drop:** Implements the native HTML Drag and Drop API for a smooth and efficient task-moving experience.
+- **Modular Code:** The JavaScript is organized into modules for better structure, readability, and maintainability.
+- **Utility-First Styling:** A fully responsive layout crafted with Tailwind CSS for a clean, modern aesthetic.
+- **Local State:** Manages application state (tasks and columns) directly within the client-side JavaScript.
 
 ---
 
 ## 📸 Screenshots
 
-_(Add screenshots of your application here to showcase the UI)_
+_(It's highly recommended to add screenshots of your application here to showcase the UI)_
 
 | Desktop View                                                                           |
 | -------------------------------------------------------------------------------------- |
@@ -33,18 +32,9 @@ _(Add screenshots of your application here to showcase the UI)_
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 How to Run
 
-- **Frontend:** React, TypeScript
-- **Styling:** Tailwind CSS
-- **Drag & Drop:** (e.g., `dnd-kit` or `react-beautiful-dnd`)
-- **Build Tool:** Vite
-
----
-
-## 🚀 How to Run Locally
-
-To get a local copy up and running, follow these simple steps.
+This project is a static web application and does not require a complex build process.
 
 1.  **Clone the repository:**
 
@@ -53,16 +43,7 @@ To get a local copy up and running, follow these simple steps.
     cd TaskMaster
     ```
 
-2.  **Install NPM packages:**
+2.  **Open in Browser:**
+    Simply open the `index.html` file in your favorite web browser.
 
-    ```bash
-    npm install
-    ```
-
-3.  **Run the development server:**
-
-    ```bash
-    npm run dev
-    ```
-
-    Open http://localhost:5173 (or the port specified in your terminal) to view it in your browser.
+    For the best experience with JavaScript modules, it's recommended to use a simple local server extension like **Live Server** for VS Code.
